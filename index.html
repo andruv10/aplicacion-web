@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="city-input" placeholder="Search for a place...">
+            <button id="search-btn">Search</button>
+        </div>
+
+        <div class="weather-container">
+            <div class="current-weather">
+                <div class="weather-icon">
+                    <img src="" alt="Weather Icon" id="weather-icon-img">
+                </div>
+                <div class="temperature">
+                    <span id="temp-value">--</span>°C
+                </div>
+                <div class="city-name" id="city-name">---</div>
+                <div class="date-time">
+                    <span id="date">---</span>, <span id="time">--:--</span>
+                </div>
+            </div>
+
+            <div class="weather-details">
+                <h2>Weather Details</h2>
+                <div class="detail-item">
+                    <span>Feels like</span>
+                    <span id="feels-like">--°C</span>
+                </div>
+                <div class="detail-item">
+                    <span>Humidity</span>
+                    <span id="humidity">--%</span>
+                </div>
+                <div class="detail-item">
+                    <span>Wind</span>
+                    <span id="wind-speed">-- km/h</span>
+                </div>
+                <div class="detail-item">
+                    <span>Precipitation</span>
+                    <span id="precipitation">-- mm</span>
+                </div>
+            </div>
+
+            <div class="daily-forecast">
+                <h2>Daily Forecast</h2>
+                <div class="forecast-container" id="forecast-container">
+                    <!-- Daily forecast items will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
