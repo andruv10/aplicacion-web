@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función asíncrona para obtener los datos del clima
     async function obtenerClima(ciudad) {
         console.log('Buscando clima para:', ciudad);
+        
+        // Deshabilitar el botón mientras se busca
+        botonBusqueda.disabled = true;
+        botonBusqueda.textContent = 'Buscando...';
+
         const urlApiGeocodificacion = `https://geocoding-api.open-meteo.com/v1/search?name=${ciudad}&count=1&language=es&format=json`;
 
         try {
@@ -72,6 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error al obtener los datos del clima:', error);
             alert('No se pudieron obtener los datos del clima. Por favor, inténtalo de nuevo.');
+        } finally {
+            // Volver a habilitar el botón
+            botonBusqueda.disabled = false;
+            botonBusqueda.textContent = 'Buscar';
         }
     }
 
