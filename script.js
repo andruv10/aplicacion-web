@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Script cargado y DOM listo.');
     // Elementos del DOM
     const campoCiudad = document.getElementById('city-input');
     const botonBusqueda = document.getElementById('search-btn');
@@ -21,13 +22,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Evento de clic en el botón de búsqueda
     botonBusqueda.addEventListener('click', () => {
+        realizarBusqueda();
+    });
+
+    // Evento de teclado para buscar con "Enter"
+    campoCiudad.addEventListener('keyup', (evento) => {
+        if (evento.key === 'Enter') {
+            realizarBusqueda();
+        }
+    });
+
+    // Función para realizar la búsqueda
+    function realizarBusqueda() {
         const nombreCiudad = campoCiudad.value.trim();
         if (nombreCiudad) {
             obtenerClima(nombreCiudad);
         } else {
             alert('Por favor, introduce el nombre de una ciudad.');
         }
-    });
+    }
 
     // Función asíncrona para obtener los datos del clima
     async function obtenerClima(ciudad) {
