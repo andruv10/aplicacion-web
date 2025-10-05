@@ -1,115 +1,128 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const cityInput = document.getElementById('city-input');
-    const searchBtn = document.getElementById('search-btn');
+    // Elementos del DOM
+    const campoCiudad = document.getElementById('city-input');
+    const botonBusqueda = document.getElementById('search-btn');
 
-    // Current weather elements
-    const weatherIconImg = document.getElementById('weather-icon-img');
-    const tempValue = document.getElementById('temp-value');
-    const cityNameEl = document.getElementById('city-name');
-    const dateEl = document.getElementById('date');
-    const timeEl = document.getElementById('time');
+    // Elementos para el clima actual
+    const iconoClimaImg = document.getElementById('weather-icon-img');
+    const valorTemperatura = document.getElementById('temp-value');
+    const nombreCiudadEl = document.getElementById('city-name');
+    const fechaEl = document.getElementById('date');
+    const horaEl = document.getElementById('time');
 
-    // Weather details elements
-    const feelsLike = document.getElementById('feels-like');
-    const humidity = document.getElementById('humidity');
-    const windSpeed = document.getElementById('wind-speed');
-    const precipitation = document.getElementById('precipitation');
+    // Elementos para los detalles del clima
+    const sensacionTermica = document.getElementById('feels-like');
+    const humedad = document.getElementById('humidity');
+    const velocidadViento = document.getElementById('wind-speed');
+    const precipitacion = document.getElementById('precipitation');
 
-    // Daily forecast container
-    const forecastContainer = document.getElementById('forecast-container');
+    // Contenedor para el pronóstico diario
+    const contenedorPronostico = document.getElementById('forecast-container');
 
-    searchBtn.addEventListener('click', () => {
-        const cityName = cityInput.value.trim();
-        if (cityName) {
-            getWeather(cityName);
+    // Evento de clic en el botón de búsqueda
+    botonBusqueda.addEventListener('click', () => {
+        const nombreCiudad = campoCiudad.value.trim();
+        if (nombreCiudad) {
+            obtenerClima(nombreCiudad);
         } else {
-            alert('Please enter a city name.');
+            alert('Por favor, introduce el nombre de una ciudad.');
         }
     });
 
-    async function getWeather(city) {
-        const geocodingApiUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=en&format=json`;
+    // Función asíncrona para obtener los datos del clima
+    async function obtenerClima(ciudad) {
+        console.log('Buscando clima para:', ciudad);
+        const urlApiGeocodificacion = `https://geocoding-api.open-meteo.com/v1/search?name=${ciudad}&count=1&language=es&format=json`;
 
         try {
-            const geoResponse = await fetch(geocodingApiUrl);
-            const geoData = await geoResponse.json();
+            // Primero, obtenemos las coordenadas de la ciudad
+            const respuestaGeo = await fetch(urlApiGeocodificacion);
+            const datosGeo = await respuestaGeo.json();
+            console.log('Respuesta de la API de geocodificación:', datosGeo);
 
-            if (geoData.results && geoData.results.length > 0) {
-                const { latitude, longitude, name } = geoData.results[0];
-                const weatherApiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
+            if (datosGeo.results && datosGeo.results.length > 0) {
+                const { latitude, longitude, name } = datosGeo.results[0];
                 
-                const weatherResponse = await fetch(weatherApiUrl);
-                const weatherData = await weatherResponse.json();
+                // Luego, obtenemos el clima para esas coordenadas
+                const urlApiClima = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
+                
+                const respuestaClima = await fetch(urlApiClima);
+                const datosClima = await respuestaClima.json();
+                console.log('Respuesta de la API del clima:', datosClima);
 
-                displayCurrentWeather(weatherData, name);
-                displayWeatherDetails(weatherData);
-                displayDailyForecast(weatherData);
+                mostrarClimaActual(datosClima, name);
+                mostrarDetallesClima(datosClima);
+                mostrarPronosticoDiario(datosClima);
             } else {
-                alert('City not found.');
+                alert('Ciudad no encontrada.');
             }
         } catch (error) {
-            console.error('Error fetching weather data:', error);
-            alert('Could not fetch weather data. Please try again.');
+            console.error('Error al obtener los datos del clima:', error);
+            alert('No se pudieron obtener los datos del clima. Por favor, inténtalo de nuevo.');
         }
     }
 
-    function displayCurrentWeather(data, cityName) {
-        if (data && data.current_weather) {
-            const { temperature, weathercode, time } = data.current_weather;
+    // Función para mostrar el clima actual
+    function mostrarClimaActual(datos, nombreCiudad) {
+        if (datos && datos.current_weather) {
+            const { temperature, weathercode, time } = datos.current_weather;
             
-            tempValue.textContent = Math.round(temperature);
-            cityNameEl.textContent = cityName;
-            weatherIconImg.src = getWeatherIcon(weathercode);
+            valorTemperatura.textContent = Math.round(temperature);
+            nombreCiudadEl.textContent = nombreCiudad;
+            iconoClimaImg.src = obtenerIconoClima(weathercode);
 
-            const currentDate = new Date(time);
-            dateEl.textContent = currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            timeEl.textContent = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const fechaActual = new Date(time);
+            fechaEl.textContent = fechaActual.toLocaleDateString('es-ES', { weekday: 'long', month: 'long', day: 'numeric' });
+            horaEl.textContent = fechaActual.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         }
     }
 
-    function displayWeatherDetails(data) {
-        if (data && data.current_weather) {
-            const { windspeed } = data.current_weather;
-            const { temperature_2m_min, temperature_2m_max, precipitation_sum } = data.daily;
+    // Función para mostrar los detalles del clima
+    function mostrarDetallesClima(datos) {
+        if (datos && datos.current_weather) {
+            const { windspeed } = datos.current_weather;
+            const { temperature_2m_min, temperature_2m_max, precipitation_sum } = datos.daily;
 
-            feelsLike.textContent = `${Math.round(temperature_2m_min[0])}°C / ${Math.round(temperature_2m_max[0])}°C`;
-            humidity.textContent = `--%`; // Humidity data not available in this API response
-            windSpeed.textContent = `${windspeed} km/h`;
-            precipitation.textContent = `${precipitation_sum[0]} mm`;
+            sensacionTermica.textContent = `${Math.round(temperature_2m_min[0])}°C / ${Math.round(temperature_2m_max[0])}°C`;
+            humedad.textContent = `--%`; // La API no proporciona la humedad en esta respuesta
+            velocidadViento.textContent = `${windspeed} km/h`;
+            precipitacion.textContent = `${precipitation_sum[0]} mm`;
         }
     }
 
-    function displayDailyForecast(data) {
-        if (data && data.daily) {
-            forecastContainer.innerHTML = '';
-            const { time, weathercode, temperature_2m_max, temperature_2m_min } = data.daily;
+    // Función para mostrar el pronóstico diario
+    function mostrarPronosticoDiario(datos) {
+        if (datos && datos.daily) {
+            contenedorPronostico.innerHTML = '';
+            const { time, weathercode, temperature_2m_max, temperature_2m_min } = datos.daily;
 
             for (let i = 1; i < 6; i++) {
-                const date = new Date(time[i]);
-                const day = date.toLocaleDateString('en-US', { weekday: 'short' });
+                const fecha = new Date(time[i]);
+                const dia = fecha.toLocaleDateString('es-ES', { weekday: 'short' });
 
-                const forecastItem = `
+                const itemPronostico = `
                     <div class="forecast-item">
-                        <div class="day">${day}</div>
-                        <img src="${getWeatherIcon(weathercode[i])}" alt="Weather Icon">
+                        <div class="day">${dia}</div>
+                        <img src="${obtenerIconoClima(weathercode[i])}" alt="Icono del Clima">
                         <div class="temp">${Math.round(temperature_2m_min[i])}°/${Math.round(temperature_2m_max[i])}°</div>
                     </div>
                 `;
-                forecastContainer.innerHTML += forecastItem;
+                contenedorPronostico.innerHTML += itemPronostico;
             }
         }
     }
 
-    function getWeatherIcon(code) {
-        if (code >= 0 && code <= 1) return 'https://img.icons8.com/fluency/96/sun.png';
-        if (code === 2) return 'https://img.icons8.com/fluency/96/partly-cloudy-day.png';
-        if (code === 3) return 'https://img.icons8.com/fluency/96/cloud.png';
-        if (code >= 45 && code <= 48) return 'https://img.icons8.com/fluency/96/fog-day.png';
-        if (code >= 51 && code <= 67) return 'https://img.icons8.com/fluency/96/rain.png';
-        if (code >= 71 && code <= 77) return 'https://img.icons8.com/fluency/96/snow.png';
-        if (code >= 80 && code <= 82) return 'https://img.icons8.com/fluency/96/rain.png';
-        if (code >= 85 && code <= 86) return 'https://img.icons8.com/fluency/96/snow.png';
-        if (code >= 95 && code <= 99) return 'https://img.icons8.com/fluency/96/storm.png';
-        return 'https://img.icons8.com/fluency/96/sun.png';
+    // Función para obtener el icono del clima según el código
+    function obtenerIconoClima(codigo) {
+        if (codigo >= 0 && codigo <= 1) return 'https://img.icons8.com/fluency/96/sun.png';
+        if (codigo === 2) return 'https://img.icons8.com/fluency/96/partly-cloudy-day.png';
+        if (codigo === 3) return 'https://img.icons8.com/fluency/96/cloud.png';
+        if (codigo >= 45 && codigo <= 48) return 'https://img.icons8.com/fluency/96/fog-day.png';
+        if (codigo >= 51 && codigo <= 67) return 'https://img.icons8.com/fluency/96/rain.png';
+        if (codigo >= 71 && codigo <= 77) return 'https://img.icons8.com/fluency/96/snow.png';
+        if (codigo >= 80 && codigo <= 82) return 'https://img.icons8.com/fluency/96/rain.png';
+        if (codigo >= 85 && codigo <= 86) return 'https://img.icons8.com/fluency/96/snow.png';
+        if (codigo >= 95 && codigo <= 99) return 'https://img.icons8.com/fluency/96/storm.png';
+        return 'https://img.icons8.com/fluency/96/sun.png'; // Icono por defecto
     }
 });
